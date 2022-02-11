@@ -1,6 +1,6 @@
 name: cortex
 description: Flutter plugin for Cortex library.
-version: 0.0.1
+version: 0.0.3
 homepage: https://github.com/Emotiv/flutter-plugin
 
 environment:

@@ -54,3 +54,8 @@ sendRequestToCortex('{ "id": 1, "jsonrpc": "2.0", "method": "queryHeadsets"}');
 ```
 
 Also see the `example` subdirectory for an example application that uses to work with real device.
+Remember to add `EmotivCortexLib.aar` to your main project.
+
+### Attention
+
+Only Emotiv's partner can get EmotivCortexLib.aar for now. But we have the plan to publish it in the future.
