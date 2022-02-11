@@ -34,7 +34,7 @@ It also provides 3 functions to work with Cortex.
 ### Example
 
 ```dart
-import 'package:cortex/cortex_plugin.dart';
+import 'package:cortex/cortex.dart';
 
 responseEvents.listen((event) {
   print(event);

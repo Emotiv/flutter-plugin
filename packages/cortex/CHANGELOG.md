@@ -9,3 +9,7 @@
 ## 0.0.3
 
 * Fix Error when export dart file
+
+## 0.0.4
+
+* Update README
