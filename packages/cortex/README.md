@@ -1,4 +1,6 @@
-A Flutter plugin to work with Cortex library
+# cortex
+
+A Flutter plugin to access Cortex library and work with Emotiv EEG headset
 
 ## Platform Support
 
