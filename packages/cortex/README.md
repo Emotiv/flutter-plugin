@@ -10,8 +10,7 @@ A Flutter plugin to access Cortex library and work with Emotiv EEG headset
 
 ## Usage
 
-To use this plugin, add `cortex` as a [dependency in your pubspec.yaml
-file](https://plus.fluttercommunity.dev/docs/overview).
+To use this plugin, add `cortex` as a dependency in your pubspec.yaml.
 
 This will expose three classes of Cortex events through 3 different
 streams:

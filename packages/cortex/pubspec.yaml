@@ -1,6 +1,6 @@
 name: cortex
 description: Flutter plugin to access Cortex library and work with Emotiv EEG headset.
-version: 0.0.6
+version: 0.0.7
 homepage: https://github.com/Emotiv/flutter-plugin
 
 environment:
