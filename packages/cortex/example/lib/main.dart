@@ -133,6 +133,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _authorize() {
+    //// license field is optional
     String json = ''' { 
         "jsonrpc": "2.0",
         "id": ${Constant.authorizeRequestId},
@@ -208,6 +209,20 @@ class _MyAppState extends State<MyApp> {
           "cortexToken": "$_cortexToken",
           "session": "$_sessionId",
           "streams": ["eeg"]
+          } 
+        } ''';
+    sendRequestToCortex(json);
+  }
+
+  void _closeSession() {
+    String json = ''' { 
+        "jsonrpc": "2.0",
+        "id": ${Constant.updateSessionRequestId},
+        "method": "updateSession",
+        "params": {
+          "cortexToken": "$_cortexToken",
+          "session": "$_sessionId",
+          "status": "close"
           } 
         } ''';
     sendRequestToCortex(json);
@@ -336,7 +351,7 @@ class _MyAppState extends State<MyApp> {
               height: 8.0,
             ),
             TextButton(
-              onPressed: _getLicenseInfo,
+              onPressed: _closeSession,
               child: const Text("close session"),
             )
           ],

@@ -1,12 +1,12 @@
 
 class Constant {
-   static const String clientId = "aYjE5O3LGYJXCiC04hBTjmHSR8GSIu6zgHsff2pK";
-   static const String clientSecret = "KHzMfMA8wyKGe4hsiRAPaJpDK0IDJAXoT0XqT8TbY7YMwTFeyWZyirZ9q85qxNIiGmATT8HjoseXgedwNYPwXiHtHGlKpTWpo2lywB3RqUcsVMQGTqCvNSsalxlRvcKa";
+   static const String clientId = "your-client-id";
+   static const String clientSecret = "your-client-secret";
 
    static const int debitNumber = 10;
    // if LICENSE_ID is empty our system will choose a valid license from your emotiv account
    // if want to use a specific license. Please put your license here
-   static const String licenseId = "c7a7b054-82d2-42fa-9b29-efb3c5eed053";
+   static const String licenseId = "your-license-id";
    // The name of the training profile used for the facial expression and mental command
    static const String trainingProfileName = "cortex-v2-example";
 
