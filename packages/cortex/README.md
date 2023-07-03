@@ -6,7 +6,7 @@ A Flutter plugin to access Cortex library and work with Emotiv EEG headset
 
 | Android |  iOS  | MacOS |  Web  | Linux | Windows |
 | :-----: | :---: | :---: | :---: | :---: | :-----: |
-|   ✔️    |      |      |     |       |         |
+|   ✔️    |  ✔️  |      |     |       |         |
 
 ## Usage
 
