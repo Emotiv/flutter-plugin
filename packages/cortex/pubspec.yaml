@@ -1,6 +1,6 @@
 name: cortex
 description: Flutter plugin to access Cortex library and work with Emotiv EEG headset.
-version: 0.0.7
+version: 0.0.8
 homepage: https://github.com/Emotiv/flutter-plugin
 
 environment:
@@ -31,6 +31,8 @@ flutter:
       android:
         package: com.emotiv.cortex
         pluginClass: CortexPlugin
+      ios:
+        pluginClass: CortexPlugin  
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:
