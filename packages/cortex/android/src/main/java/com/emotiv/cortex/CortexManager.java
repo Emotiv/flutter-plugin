@@ -115,6 +115,7 @@ public class CortexManager implements PluginRegistry.ActivityResultListener, Res
             List<CortexEventListener> values = ee.getValue();
             values.remove(item);
         }
+        mCortexClient.close();
     }
 
     boolean startCortex() {

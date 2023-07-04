@@ -10,13 +10,18 @@
 
 @implementation CortexManager
 
--(id) init
+- (id)init
 {
     self = [super init];
+    if(self)
+    {
+        eventChannels = [NSMutableDictionary dictionary];
+        streamHandlers = [NSMutableDictionary dictionary];
+    }
     return self;
 }
 
--(BOOL) startCortex
+- (BOOL)startCortex
 {
     [CortexLib setCortexLogHandler:kInfo handler:nil];
     return [CortexLib start:^(void){
@@ -24,7 +29,7 @@
     }];;
 }
 
--(BOOL) sendRequest:(NSString *)command
+- (BOOL)sendRequest:(NSString *)command
 {
     if(!cortexClient)
         return FALSE;
@@ -32,17 +37,17 @@
     return TRUE;
 }
 
--(void) startAuthentication:(NSString *)clientId
+- (void)startAuthentication:(NSString *)clientId
 {
     
 }
 
--(void) setDisplayContex:(id<ASWebAuthenticationPresentationContextProviding>)contex
+- (void)setDisplayContex:(id<ASWebAuthenticationPresentationContextProviding>)contex
 {
     
 }
 
--(void) onCortexStarted
+- (void)onCortexStarted
 {
     NSLog(@"onCortexStarted");
     if(!cortexClient)
@@ -52,11 +57,60 @@
     }
 }
 
+- (void)registerHandler:(StreamHandler *)handler forEvent:(FlutterEventChannel *)event
+{
+    NSNumber *key = [NSNumber numberWithInt:handler.eventType];
+    [eventChannels setObject:event forKey:key];
+    [streamHandlers setObject:handler forKey:key];
+}
+
+- (void)unregisterListener
+{
+    for (FlutterEventChannel *channel in eventChannels.allValues)
+    {
+        [channel setStreamHandler:nil];
+    }
+    [eventChannels removeAllObjects];
+    
+    for (NSObject<FlutterStreamHandler> *handler in streamHandlers.allValues)
+    {
+        [handler onCancelWithArguments:nil];
+    }
+    [streamHandlers removeAllObjects];
+    
+    [cortexClient close];
+}
+
 #pragma mark CortexClientDelegate
 
-- (void) processResponse:(NSString *)responseMessage
+- (void)processResponse:(NSString *)responseMessage
 {
-    NSLog(@"response for the request: %@", responseMessage);
+    //NSLog(@"response for the request: %@", responseMessage);
+    NSError *error;
+    NSDictionary * response = [NSJSONSerialization JSONObjectWithData:[responseMessage dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingMutableLeaves error:&error];
+    if(!error)
+    {
+        NSDictionary *warning = [response objectForKey:@"warning"];
+        NSString *sid = [response objectForKey:@"sid"];
+        if(warning != nil)
+        {
+            StreamHandler *handler = [streamHandlers objectForKey:[NSNumber numberWithInt:WarningEvent]];
+            if(handler.onEventUpdated)
+                handler.onEventUpdated(responseMessage);
+        }
+        else if (sid != nil)
+        {
+            StreamHandler *handler = [streamHandlers objectForKey:[NSNumber numberWithInt:DataStreamEvent]];
+            if(handler.onEventUpdated)
+                handler.onEventUpdated(responseMessage);
+        }
+        else
+        {
+            StreamHandler *handler = [streamHandlers objectForKey:[NSNumber numberWithInt:ResponseEvent]];
+            if(handler.onEventUpdated)
+                handler.onEventUpdated(responseMessage);
+        }
+    }
 }
 
 - (void)authenticationFinished:(NSString *)authenticationCode withError:(NSError *)error {
