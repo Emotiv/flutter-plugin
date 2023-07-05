@@ -23,7 +23,7 @@
 
 - (BOOL)startCortex
 {
-    [CortexLib setCortexLogHandler:kInfo handler:nil];
+    //[CortexLib setCortexLogHandler:kInfo handler:nil];
     return [CortexLib start:^(void){
         [self onCortexStarted];
     }];;
@@ -37,14 +37,18 @@
     return TRUE;
 }
 
-- (void)startAuthentication:(NSString *)clientId
+- (BOOL)startAuthentication:(NSString *)clientId
 {
+    if(!cortexClient)
+        return FALSE;
     
+    [cortexClient authenticate:clientId];
+    return TRUE;
 }
 
 - (void)setDisplayContex:(id<ASWebAuthenticationPresentationContextProviding>)contex
 {
-    
+    self.displayContext = contex;
 }
 
 - (void)onCortexStarted
@@ -54,6 +58,7 @@
     {
         cortexClient = [[CortexClient alloc] init];
         cortexClient.delegate = self;
+        cortexClient.displayContext = self.displayContext;
     }
 }
 
@@ -114,12 +119,13 @@
 }
 
 - (void)authenticationFinished:(NSString *)authenticationCode withError:(NSError *)error {
-    if(!error)
-    {
-        NSLog(@"authentication code: %@",authenticationCode);
-    }
-    else
-        NSLog(@"error: %@", error.description);
+//    if(!error)
+//        NSLog(@"authentication code: %@",authenticationCode);
+//    else
+//        NSLog(@"error: %@", error.description);
+    
+    if(self.onReceivedAuthenCode)
+        self.onReceivedAuthenCode(authenticationCode, error);
 }
 
 @end

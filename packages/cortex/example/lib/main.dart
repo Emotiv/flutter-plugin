@@ -32,6 +32,7 @@ class Headset {
 
 class _MyAppState extends State<MyApp> {
   final _streamSubscriptions = <StreamSubscription<dynamic>>[];
+  late String _userName;
   late final String _cortexToken;
   late String _sessionId;
   late String _activeHeadset;
@@ -66,6 +67,26 @@ class _MyAppState extends State<MyApp> {
             case Constant.createSessionRequestId:
               var data = event.getResponseBody();
               _sessionId = data["id"];
+              break;
+            case Constant.getUserLoggedInRequestId:
+              var data = event.getResponseBody();
+              if(data.length != 0)
+              {
+                _userName = data[0]["username"] as String;
+              }
+              break;
+            case Constant.loginRequestId:
+              if(!event.isResponseError())
+              {
+                _userName = event.getResponseBody()["username"];
+                print("user logged in: $_userName");
+              }
+              break;
+            case Constant.logoutRequestId:
+              if(!event.isResponseError())
+              {
+                _userName = "";
+              }
               break;
             default:
               break;
@@ -130,6 +151,18 @@ class _MyAppState extends State<MyApp> {
         } ''';
       sendRequestToCortex(json);
     }
+  }
+
+  void _logout() async {
+    String json = ''' { 
+        "jsonrpc": "2.0",
+        "id": ${Constant.logoutRequestId},
+        "method": "logout",
+        "params": {
+          "username": "$_userName"
+          } 
+        } ''';
+    sendRequestToCortex(json);
   }
 
   void _authorize() {
@@ -293,62 +326,69 @@ class _MyAppState extends State<MyApp> {
                 onPressed: () => sendRequestToCortex(
                     '{ "id": ${Constant.getUserLoggedInRequestId}, "jsonrpc": "2.0", "method": "getUserLogin"}'),
                 child: const Text("Get User Login")),
-            const SizedBox(height: 8.0),
+            const SizedBox(height: 5.0),
             TextButton(
               onPressed: _login,
               child: const Text("Login"),
             ),
             const SizedBox(
-              height: 8.0,
+              height: 5.0,
+            ),
+            TextButton(
+              onPressed: _logout,
+              child: const Text("Logout"),
+            ),
+            const SizedBox(
+              height: 5.0,
             ),
             TextButton(
               onPressed: _authorize,
               child: const Text("Authorize"),
             ),
             const SizedBox(
-              height: 8.0,
+              height: 5.0,
             ),
             TextButton(
               onPressed: _getUserInfo,
               child: const Text("Get User Information"),
             ),
             const SizedBox(
-              height: 8.0,
+              height: 5.0,
             ),
             TextButton(
               onPressed: _getLicenseInfo,
               child: const Text("Get License Information"),
             ),
             const SizedBox(
-              height: 8.0,
+              height: 5.0,
             ),
             TextButton(
               onPressed: _queryHeadset,
               child: const Text("QueryHeadset"),
             ),
             const SizedBox(
-              height: 8.0,
+              height: 5.0,
             ),
             TextButton(
               onPressed: _createSession,
               child: const Text("Create Session"),
             ),
             const SizedBox(
-              height: 8.0,
+              height: 5.0,
             ),
             TextButton(
               onPressed: _subscribeData,
               child: const Text("Subscribe Data"),
             ),
             const SizedBox(
-              height: 8.0,
+              height: 5.0,
             ),
             TextButton(
               onPressed: _unsubscribeData,
               child: const Text("Unsubscribe Data"),
             ),
             const SizedBox(
-              height: 8.0,
+              height: 5.0,
             ),
             TextButton(
               onPressed: _closeSession,

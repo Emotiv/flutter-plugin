@@ -22,13 +22,16 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)setDisplayContex:(id<ASWebAuthenticationPresentationContextProviding>)contex API_AVAILABLE(ios(13.0));
-- (void)startAuthentication:(NSString*)clientId;
+- (BOOL)startAuthentication:(NSString*)clientId;
 - (BOOL)sendRequest: (NSString *) command;
 - (BOOL)startCortex;
 - (void)onCortexStarted;
 
 - (void)registerHandler:(StreamHandler *)handler forEvent:(FlutterEventChannel *)event;
 - (void)unregisterListener;
+
+@property (copy) void (^onReceivedAuthenCode)(NSString*, NSError* error);
+@property (nonatomic, weak) id<ASWebAuthenticationPresentationContextProviding> displayContext API_AVAILABLE(ios(13.0));
 
 @end
 

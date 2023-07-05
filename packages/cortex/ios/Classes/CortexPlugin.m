@@ -1,5 +1,6 @@
 #import "CortexPlugin.h"
 #import "CortexManager.h"
+#import "ViewController.h"
 
 @implementation CortexPlugin
 
@@ -18,6 +19,11 @@ CortexManager *manager = nil;
   if(!manager)
   {
       manager = [[CortexManager alloc]init];
+      
+      ViewController* viewController = [[ViewController alloc]init];
+      [[UIApplication sharedApplication].delegate.window.rootViewController.view addSubview:viewController.view];
+      [[UIApplication sharedApplication].delegate.window.rootViewController addChildViewController:viewController];
+      manager.displayContext = viewController;
       
       StreamHandler *responseHandler = [[StreamHandler alloc] initWithEventType:ResponseEvent];
       FlutterEventChannel *responseChannel =
@@ -43,10 +49,13 @@ CortexManager *manager = nil;
 }
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
-  if ([@"startCortex" isEqualToString:call.method]) {
+  if ([@"startCortex" isEqualToString:call.method])
+  {
       BOOL callResult = [manager startCortex];
       result(@(callResult));
-  } else if ([@"sendRequest" isEqualToString:call.method]){
+  }
+  else if ([@"sendRequest" isEqualToString:call.method])
+  {
       NSString* command = call.arguments[@"command"];
       BOOL callResult = [manager sendRequest:command];
       if(callResult)
@@ -56,7 +65,30 @@ CortexManager *manager = nil;
                                            message:@"CortexClient is null"
                                            details:nil]);
   }
-  else {
+  else if ([@"authenticate" isEqualToString:call.method])
+  {
+      NSString* clientId = call.arguments[@"clientId"];
+      BOOL callResult = [manager startAuthentication:clientId];
+      if(!callResult)
+      {
+          result([FlutterError errorWithCode:@"UNAVAILABLE"
+                                           message:@"CortexClient is null"
+                                           details:nil]);
+          return;
+      }
+      
+      manager.onReceivedAuthenCode = ^(NSString* code, NSError* error)
+      {
+          if(!error)
+              result(code);
+          else
+              result([FlutterError errorWithCode:@"Authentication error"
+                                               message:error.description
+                                               details:nil]);
+      };
+  }
+  else
+  {
     result(FlutterMethodNotImplemented);
   }
 }
