@@ -52,8 +52,10 @@ sendRequestToCortex('{ "id": 1, "jsonrpc": "2.0", "method": "queryHeadsets"}');
 ```
 
 Also see the `example` subdirectory for the example application that uses to work with real device.
-Remember to add `EmotivCortexLib.aar` to your main project.
+Remember to add 
+- `EmotivCortexLib.aar` to your main project with Android build
+- `EmotivCortexLib.xcframework` to folder `Frameworks` of iOS plugin with iOS build
 
 ### Attention
 
-The embedded Cortex library (`EmotivCortexLib.aar` on Android) is in private beta only, and will be published in the future.
+The embedded Cortex library (`EmotivCortexLib.aar` for Android and `EmotivCortexLib.xcframework` for iOS) is in private beta only, and will be published in the future.
