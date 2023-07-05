@@ -31,6 +31,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)unregisterListener;
 
 @property (copy) void (^onReceivedAuthenCode)(NSString*, NSError* error);
+@property (nonatomic, weak) id<ASWebAuthenticationPresentationContextProviding> displayContext API_AVAILABLE(ios(13.0));
 
 @end
 

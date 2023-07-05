@@ -19,10 +19,11 @@ CortexManager *manager = nil;
   if(!manager)
   {
       manager = [[CortexManager alloc]init];
+      
       ViewController* viewController = [[ViewController alloc]init];
-      [[UIApplication sharedApplication].keyWindow.rootViewController.view addSubview:viewController.view];
-      [[UIApplication sharedApplication].keyWindow.rootViewController addChildViewController:viewController];
-      [manager setDisplayContex:viewController];
+      [[UIApplication sharedApplication].delegate.window.rootViewController.view addSubview:viewController.view];
+      [[UIApplication sharedApplication].delegate.window.rootViewController addChildViewController:viewController];
+      manager.displayContext = viewController;
       
       StreamHandler *responseHandler = [[StreamHandler alloc] initWithEventType:ResponseEvent];
       FlutterEventChannel *responseChannel =
@@ -68,7 +69,6 @@ CortexManager *manager = nil;
   {
       NSString* clientId = call.arguments[@"clientId"];
       BOOL callResult = [manager startAuthentication:clientId];
-      NSLog(@"authenticate result: %d", callResult);
       if(!callResult)
       {
           result([FlutterError errorWithCode:@"UNAVAILABLE"
@@ -81,6 +81,10 @@ CortexManager *manager = nil;
       {
           if(!error)
               result(code);
+          else
+              result([FlutterError errorWithCode:@"Authentication error"
+                                               message:error.description
+                                               details:nil]);
       };
   }
   else

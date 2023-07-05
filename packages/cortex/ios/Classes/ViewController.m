@@ -30,8 +30,7 @@
 
 -(ASPresentationAnchor)presentationAnchorForWebAuthenticationSession:(ASWebAuthenticationSession *)session
 {
-    NSLog(@"aaaa");
-    return [UIApplication sharedApplication].keyWindow;
+    return self.view.window;
 }
 
 @end
