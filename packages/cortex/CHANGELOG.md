@@ -6,3 +6,7 @@
 
 * Support iOS plugin
 
+## 0.1.0
+
+* Fix issue of Android example (missing android:extractNativeLibs="true")
+
