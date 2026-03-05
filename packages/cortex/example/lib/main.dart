@@ -42,69 +42,71 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     callCortexStart();
     _streamSubscriptions.add(
-      responseEvents.listen(
-        (event) {
-          print(event);
-          switch (event.getRequestId()) {
-            case Constant.authorizeRequestId:
-              // get cortex token and save to variable
-              var data = event.getResponseBody() as Map<String, dynamic>;
-              _cortexToken = data["cortexToken"];
-              print("cortex token: $_cortexToken");
-              break;
-            case Constant.queryHeadsetRequestId:
-              var data = event.getResponseBody();
-              List<Headset> headset = <Headset>[];
-              for (var element in data) {
-                Headset h = Headset(
-                    element["id"], element["isVirtual"], element["status"]);
-                headset.add(h);
-              }
-              setState(() {
-                _headsetList = headset;
-              });
-              break;
-            case Constant.createSessionRequestId:
-              var data = event.getResponseBody();
-              _sessionId = data["id"];
-              break;
-            case Constant.getUserLoggedInRequestId:
-              var data = event.getResponseBody();
-              if(data.length != 0)
-              {
-                _userName = data[0]["username"] as String;
-              }
-              break;
-            case Constant.loginRequestId:
-              if(!event.isResponseError())
-              {
-                _userName = event.getResponseBody()["username"];
-                print("user logged in: $_userName");
-              }
-              break;
-            case Constant.logoutRequestId:
-              if(!event.isResponseError())
-              {
-                _userName = "";
-              }
-              break;
-            default:
-              break;
-          }
-        },
-      ),
+      responseEvents.listen((event) {
+        print(event);
+        switch (event.getRequestId()) {
+          case Constant.authorizeRequestId:
+            // get cortex token and save to variable
+            var data = event.getResponseBody() as Map<String, dynamic>;
+            _cortexToken = data["cortexToken"];
+            print("cortex token: $_cortexToken");
+            break;
+          case Constant.queryHeadsetRequestId:
+            var data = event.getResponseBody();
+            List<Headset> headset = <Headset>[];
+            for (var element in data) {
+              Headset h = Headset(
+                element["id"],
+                element["isVirtual"],
+                element["status"],
+              );
+              headset.add(h);
+            }
+            setState(() {
+              _headsetList = headset;
+            });
+            break;
+          case Constant.createSessionRequestId:
+            var data = event.getResponseBody();
+            _sessionId = data["id"];
+            break;
+          case Constant.getUserLoggedInRequestId:
+            var data = event.getResponseBody();
+            if (data.length != 0) {
+              _userName = data[0]["username"] as String;
+            }
+            break;
+          case Constant.loginRequestId:
+            if (!event.isResponseError()) {
+              _userName = event.getResponseBody()["username"];
+              print("user logged in: $_userName");
+            }
+            break;
+          case Constant.logoutRequestId:
+            if (!event.isResponseError()) {
+              _userName = "";
+            }
+            break;
+          default:
+            break;
+        }
+      }),
     );
-    _streamSubscriptions.add(warningEvents.listen((event) {
-      if (event.getWarningCode() == Constant.headsetIsConnected) {
-        // query headset again to update status
-        var data = event.getWarningMessage();
-        _activeHeadset = data["headsetId"];
-        _queryHeadset();
-      }
-    }));
-    _streamSubscriptions.add(dataStreamEvents.listen((event) {
-      print("Data Stream Event: ${event.getDataStreamBody()}");
-    }));
+    _streamSubscriptions.add(
+      warningEvents.listen((event) {
+        if (event.getWarningCode() == Constant.headsetIsConnected) {
+          // query headset again to update status
+          var data = event.getWarningMessage();
+          _activeHeadset = data["headsetId"];
+          _queryHeadset();
+        }
+      }),
+    );
+    _streamSubscriptions.add(
+      dataStreamEvents.listen((event) {
+        print("Data Stream Event: ${event.getDataStreamBody()}");
+      }),
+    );
   }
 
   @override
@@ -120,8 +122,18 @@ class _MyAppState extends State<MyApp> {
     try {
       if (Platform.isAndroid) {
         Map<Permission, PermissionStatus> statuses =
-            await [Permission.location].request();
-        print(statuses[Permission.location]);
+            await [
+              Permission.location,
+              Permission.bluetooth,
+              Permission.bluetoothScan,
+              Permission.bluetoothConnect,
+            ].request();
+        print(
+          "Location: ${statuses[Permission.location]}, "
+          "Bluetooth: ${statuses[Permission.bluetooth]}, "
+          "Bluetooth Scan: ${statuses[Permission.bluetoothScan]}, "
+          "Bluetooth Connect: ${statuses[Permission.bluetoothConnect]}",
+        );
       }
       result = await startCortex();
       print("call cortex start: $result");
@@ -130,9 +142,16 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  void _refreshHeadset() {
+    sendRequestToCortex(
+      '{ "id": ${Constant.refreshHeadsetRequestId}, "jsonrpc": "2.0", "method": "controlDevice", "params": {"command": "refresh"}}',
+    );
+  }
+
   void _queryHeadset() {
     sendRequestToCortex(
-        '{ "id": ${Constant.queryHeadsetRequestId}, "jsonrpc": "2.0", "method": "queryHeadsets"}');
+      '{ "id": ${Constant.queryHeadsetRequestId}, "jsonrpc": "2.0", "method": "queryHeadsets"}',
+    );
   }
 
   void _login() async {
@@ -265,14 +284,14 @@ class _MyAppState extends State<MyApp> {
 
   DataRow _getDataRow(Headset result) {
     return DataRow(
-        cells: <DataCell>[
-          DataCell(Text(result.headsetId)),
-          DataCell(Text(result.isVirtual.toString())),
-          DataCell(Text(result.status)),
-        ],
-        onSelectChanged: (bool? selected) {
-          if (selected != null && selected) {
-            sendRequestToCortex('''
+      cells: <DataCell>[
+        DataCell(Text(result.headsetId)),
+        DataCell(Text(result.isVirtual.toString())),
+        DataCell(Text(result.status)),
+      ],
+      onSelectChanged: (bool? selected) {
+        if (selected != null && selected) {
+          sendRequestToCortex('''
               { "id": ${Constant.controlDeviceRequestId}, 
               "jsonrpc": "2.0", 
               "method": "controlDevice",
@@ -282,10 +301,10 @@ class _MyAppState extends State<MyApp> {
               }
               }
               ''');
-          }
-        },
-        onLongPress: () {
-          sendRequestToCortex('''
+        }
+      },
+      onLongPress: () {
+        sendRequestToCortex('''
               { "id": ${Constant.controlDeviceRequestId}, 
               "jsonrpc": "2.0", 
               "method": "controlDevice",
@@ -295,107 +314,88 @@ class _MyAppState extends State<MyApp> {
               }
               }
               ''');
-        });
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
-        ),
+        appBar: AppBar(title: const Text('Plugin example app')),
         body: Center(
-            child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            DataTable(
-              showCheckboxColumn: false,
-              horizontalMargin: 5,
-              dataTextStyle: const TextStyle(fontSize: 12, color: Colors.black),
-              columns: const [
-                DataColumn(label: Text('HeadsetId')),
-                DataColumn(label: Text('isVirtualHeadset')),
-                DataColumn(label: Text('Status')),
-              ],
-              rows: List.generate(_headsetList.length,
-                  (index) => _getDataRow(_headsetList[index])),
-            ),
-            const SizedBox(height: 100.0),
-            TextButton(
-                onPressed: () => sendRequestToCortex(
-                    '{ "id": ${Constant.getUserLoggedInRequestId}, "jsonrpc": "2.0", "method": "getUserLogin"}'),
-                child: const Text("Get User Login")),
-            const SizedBox(height: 5.0),
-            TextButton(
-              onPressed: _login,
-              child: const Text("Login"),
-            ),
-            const SizedBox(
-              height: 5.0,
-            ),
-            TextButton(
-              onPressed: _logout,
-              child: const Text("Logout"),
-            ),
-            const SizedBox(
-              height: 5.0,
-            ),
-            TextButton(
-              onPressed: _authorize,
-              child: const Text("Authorize"),
-            ),
-            const SizedBox(
-              height: 5.0,
-            ),
-            TextButton(
-              onPressed: _getUserInfo,
-              child: const Text("Get User Information"),
-            ),
-            const SizedBox(
-              height: 5.0,
-            ),
-            TextButton(
-              onPressed: _getLicenseInfo,
-              child: const Text("Get License Information"),
-            ),
-            const SizedBox(
-              height: 5.0,
-            ),
-            TextButton(
-              onPressed: _queryHeadset,
-              child: const Text("QueryHeadset"),
-            ),
-            const SizedBox(
-              height: 5.0,
-            ),
-            TextButton(
-              onPressed: _createSession,
-              child: const Text("Create Session"),
-            ),
-            const SizedBox(
-              height: 5.0,
-            ),
-            TextButton(
-              onPressed: _subscribeData,
-              child: const Text("Subscribe Data"),
-            ),
-            const SizedBox(
-              height: 5.0,
-            ),
-            TextButton(
-              onPressed: _unsubscribeData,
-              child: const Text("Unsubscribe Data"),
-            ),
-            const SizedBox(
-              height: 5.0,
-            ),
-            TextButton(
-              onPressed: _closeSession,
-              child: const Text("close session"),
-            )
-          ],
-        )),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              DataTable(
+                showCheckboxColumn: false,
+                horizontalMargin: 5,
+                dataTextStyle: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.black,
+                ),
+                columns: const [
+                  DataColumn(label: Text('HeadsetId')),
+                  DataColumn(label: Text('isVirtualHeadset')),
+                  DataColumn(label: Text('Status')),
+                ],
+                rows: List.generate(
+                  _headsetList.length,
+                  (index) => _getDataRow(_headsetList[index]),
+                ),
+              ),
+              const SizedBox(height: 100.0),
+              TextButton(
+                onPressed:
+                    () => sendRequestToCortex(
+                      '{ "id": ${Constant.getUserLoggedInRequestId}, "jsonrpc": "2.0", "method": "getUserLogin"}',
+                    ),
+                child: const Text("Get User Login"),
+              ),
+              const SizedBox(height: 5.0),
+              TextButton(onPressed: _login, child: const Text("Login")),
+              const SizedBox(height: 5.0),
+              TextButton(onPressed: _logout, child: const Text("Logout")),
+              const SizedBox(height: 5.0),
+              TextButton(onPressed: _authorize, child: const Text("Authorize")),
+              const SizedBox(height: 5.0),
+              TextButton(
+                onPressed: _getUserInfo,
+                child: const Text("Get User Information"),
+              ),
+              const SizedBox(height: 5.0),
+              TextButton(
+                onPressed: _getLicenseInfo,
+                child: const Text("Get License Information"),
+              ),
+              const SizedBox(height: 5.0),
+              TextButton(
+                onPressed: _queryHeadset,
+                child: const Text("QueryHeadset"),
+              ),
+              const SizedBox(height: 5.0),
+              TextButton(
+                onPressed: _createSession,
+                child: const Text("Create Session"),
+              ),
+              const SizedBox(height: 5.0),
+              TextButton(
+                onPressed: _subscribeData,
+                child: const Text("Subscribe Data"),
+              ),
+              const SizedBox(height: 5.0),
+              TextButton(
+                onPressed: _unsubscribeData,
+                child: const Text("Unsubscribe Data"),
+              ),
+              const SizedBox(height: 5.0),
+              TextButton(
+                onPressed: _closeSession,
+                child: const Text("close session"),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
