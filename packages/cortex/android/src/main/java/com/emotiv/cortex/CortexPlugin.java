@@ -117,13 +117,13 @@ public final class CortexPlugin implements FlutterPlugin, ActivityAware {
 
     private void registerListeners() {
         if (pluginBinding != null) {
-            this.pluginBinding.addActivityResultListener(this.manager);
+            this.pluginBinding.addOnNewIntentListener(this.manager);
         }
     }
 
     private void deregisterListeners() {
         if (this.pluginBinding != null) {
-            this.pluginBinding.removeActivityResultListener(this.manager);
+            this.pluginBinding.removeOnNewIntentListener(this.manager);
         }
     }
 }

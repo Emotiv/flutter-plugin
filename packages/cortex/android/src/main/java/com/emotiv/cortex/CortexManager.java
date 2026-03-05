@@ -21,7 +21,7 @@ import org.json.JSONObject;
 
 import io.flutter.plugin.common.PluginRegistry;
 
-public class CortexManager implements PluginRegistry.ActivityResultListener, ResponseHandler, CortexLibInterface {
+public class CortexManager implements PluginRegistry.NewIntentListener, ResponseHandler, CortexLibInterface {
 
     public enum EventType {
         ResponseEvent,
@@ -51,13 +51,27 @@ public class CortexManager implements PluginRegistry.ActivityResultListener, Res
     }
 
     @Override
-    public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == AUTHENTICATE_HANDLE_CODE) {
-            String code = "unknown";
-            if(mCortexClient != null)
-                code = mCortexClient.getAuthenticationCode(requestCode, data);
+    public boolean onNewIntent(Intent intent) {
+        Log.d(LOG_TAG, "Received onNewIntent");
+        if (intent == null) {
+            Log.d(LOG_TAG, "Received null intent in onNewIntent.");
+            return false;
+        }
 
-            if(successCallback != null)
+        // Check if this is an OAuth redirect (deep link with authentication code)
+        if (intent.getData() != null && ongoing) {
+            Log.d(LOG_TAG, "Processing OAuth redirect from deep link");
+            String code = "unknown";
+
+            String codeParam = intent.getData().getQueryParameter("code");
+            if (codeParam != null && !codeParam.isEmpty()) {
+                code = codeParam;
+                Log.d(LOG_TAG, "Authentication code extracted from URI: " + code);
+            } else {
+                Log.e(LOG_TAG, "Cannot extract code from URI query parameter");
+            }
+
+            if (successCallback != null)
                 successCallback.onSuccess(code);
             ongoing = false;
             return true;
